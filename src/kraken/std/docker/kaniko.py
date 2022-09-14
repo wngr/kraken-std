@@ -25,6 +25,7 @@ class KanikoBuildTask(DockerBuildTask):
     kaniko_snapshot_mode: Property[str] = Property.default("redo")
     kaniko_secrets_mount_dir: Property[str] = Property.default("/kaniko/secrets")
     kaniko_secrets_from_env: Property[Sequence[str]] = Property.default(())
+    kaniko_use_compressed_caching: Property[bool] = Property.default(True)
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
@@ -75,6 +76,8 @@ class KanikoBuildTask(DockerBuildTask):
             executor_command += ["--single-snapshot"]
         if self.kaniko_cache_copy_layers.get():
             executor_command += ["--cache-copy-layers"]
+        if not self.kaniko_use_compressed_caching.get():
+            executor_command += ["--compressed-caching=false"]
         target = self.target.get()
         if target:
             executor_command += ["--target", target]
