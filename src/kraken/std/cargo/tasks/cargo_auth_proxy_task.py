@@ -100,7 +100,7 @@ class CargoAuthProxyTask(BackgroundTask):
         except FileNotFoundError as exc:
             return TaskStatus.skipped(
                 f"Could not start proxy ({exc}). This may cause errors when Cargo tries to fetch dependencies. "
-                "Consider running `pipx install proxy.py`."
+                "Please run `pipx install proxy.py; pipx inject proxy.py certifi`."
             )
 
         self.proxy_url.set(proxy_url)
