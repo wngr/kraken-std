@@ -8,7 +8,7 @@ import tarfile
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping, Sequence, Union, cast
+from typing import Any, List, Mapping, Sequence, Union, cast
 
 import databind.json
 from kraken.core import Project, Property, Task
@@ -47,7 +47,7 @@ class DistributionTask(Task):
     prefix: Property[str]
 
     #: A list of resources to include.
-    resources: Property[list[ConfiguredResource]] = Property.default_factory(list)
+    resources: Property[List[ConfiguredResource]] = Property.default_factory(list)
 
     #: A resource that describes the output file.
     _output_file_resource: Property[Resource] = Property.output()
