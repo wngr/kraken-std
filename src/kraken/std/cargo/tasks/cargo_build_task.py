@@ -46,20 +46,21 @@ class CargoBuildTask(Task):
         self.make_safe(command, {})
         return f"Run `{' '.join(command)}`."
 
+    def get_cargo_command_additional_flags(self) -> List[str]:
+        return shlex.split(os.environ.get("KRAKEN_CARGO_BUILD_FLAGS", ""))
+
     def get_cargo_command(self, env: Dict[str, str]) -> List[str]:
         incremental = self.incremental.get()
         if incremental is not None:
             env["CARGO_INCREMENTAL"] = "1" if incremental else "0"
-
-        additional_args = shlex.split(os.environ.get("KRAKEN_CARGO_BUILD_FLAGS", ""))
-        return ["cargo", "build"] + self.additional_args.get() + additional_args
+        return ["cargo", "build"] + self.additional_args.get()
 
     def make_safe(self, args: List[str], env: Dict[str, str]) -> None:
         pass
 
     def execute(self) -> TaskStatus:
         env = self.env.get()
-        command = self.get_cargo_command(env)
+        command = self.get_cargo_command(env) + self.get_cargo_command_additional_flags()
 
         safe_command = command[:]
         safe_env = env.copy()

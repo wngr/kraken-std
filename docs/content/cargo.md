@@ -51,3 +51,4 @@ __Build graph__
 ## Environment variables
 
 * `PROXY_PY_TIMEOUT`
+* `KRAKEN_CARGO_BUILD_FLAGS`
