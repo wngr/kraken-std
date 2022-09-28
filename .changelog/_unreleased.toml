@@ -1,0 +1,5 @@
+[[entries]]
+id = "4f5d1bea-a579-4a0e-aab5-ff59b74b2b91"
+type = "feature"
+description = "Add `PythonIndex.publish` setting. Nothing in kraken-std currently consumes this setting."
+author = "@NiklasRosenstein"

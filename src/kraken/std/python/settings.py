@@ -19,6 +19,7 @@ class PythonIndex:
     credentials: tuple[str, str] | None
     is_package_source: bool
     default: bool
+    publish: bool
 
 
 @dataclasses.dataclass
@@ -63,6 +64,7 @@ class PythonSettings:
         credentials: tuple[str, str] | None = None,
         is_package_source: bool = True,
         default: bool = False,
+        publish: bool = False,
     ) -> PythonSettings:
         """Adds an index to consume Python packages from or publish packages to.
 
@@ -74,6 +76,7 @@ class PythonSettings:
         :param credentials: Optional credentials to read from the index.
         :param is_package_source: If set to `False`, the index will not be used to source packages from, but
             can be used to publish to.
+        :param publish: Whether publishing to this index should be enabled.
         """
 
         if default:
@@ -98,7 +101,15 @@ class PythonSettings:
             else:
                 raise ValueError(f"cannot derive upload URL for alias {alias!r} and index URL {index_url!r}")
 
-        self.package_indexes[alias] = PythonIndex(alias, index_url, upload_url, credentials, is_package_source, default)
+        self.package_indexes[alias] = PythonIndex(
+            alias=alias,
+            index_url=index_url,
+            upload_url=upload_url,
+            credentials=credentials,
+            is_package_source=is_package_source,
+            default=default,
+            publish=publish,
+        )
         return self
 
 
