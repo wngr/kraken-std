@@ -11,6 +11,7 @@ __Supported tools__
 * Flake8
 * isort
 * Mypy
+* Pylint
 * Pytest
 
 __Supported build systems (for installing/building)__
@@ -75,6 +76,12 @@ Independent of the Python build system used, Kraken will use [Twine][] to publis
 @pydoc kraken.std.python.tasks.mypy.MypyTask
 
 @pydoc kraken.std.python.tasks.mypy.mypy
+
+### Pylint
+
+@pydoc kraken.std.python.tasks.pylint.PylintTask
+
+@pydoc kraken.std.python.tasks.pylint.pylint
 
 ### Pytest
 

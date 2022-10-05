@@ -7,6 +7,7 @@ from .tasks.isort_task import IsortTask, isort
 from .tasks.login_task import login
 from .tasks.mypy_task import MypyTask, mypy
 from .tasks.publish_task import PublishTask, publish
+from .tasks.pylint_task import PylintTask, pylint
 from .tasks.pytest_task import PytestTask, pytest
 from .tasks.update_pyproject_task import update_pyproject_task
 
@@ -31,6 +32,8 @@ __all__ = [
     "MypyTask",
     "publish",
     "PublishTask",
+    "pylint",
+    "PylintTask",
     "pytest",
     "PytestTask",
     "python_settings",
