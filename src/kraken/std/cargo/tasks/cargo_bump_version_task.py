@@ -21,6 +21,8 @@ class CargoBumpVersionTask(BackgroundTask):
     def _get_updated_cargo_toml(self) -> str:
         manifest = CargoManifest.read(self.cargo_toml_file.get())
         manifest.package.version = self.version.get()
+        if manifest.workspace and manifest.workspace.package:
+            manifest.workspace.package.version = self.version.get()
         return manifest.to_toml_string()
 
     # BackgroundTask

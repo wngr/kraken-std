@@ -42,11 +42,47 @@ class Package:
 
 
 @dataclass
+class WorkspacePackage:
+    version: str
+    unhandled: dict[str, Any] | None
+
+    @classmethod
+    def from_json(cls, json: dict[str, str]) -> WorkspacePackage:
+        cloned = dict(json)
+        version = cloned.pop("version")
+        return WorkspacePackage(version, cloned)
+
+    def to_json(self) -> dict[str, str]:
+        values = {f.name: getattr(self, f.name) for f in fields(self) if f.name != "unhandled"}
+        if self.unhandled is not None:
+            values.update({k: v for k, v in self.unhandled.items() if v is not None})
+        return {k: v for k, v in values.items() if v is not None}
+
+
+@dataclass
+class Workspace:
+    package: WorkspacePackage | None
+    unhandled: dict[str, Any] | None
+
+    @classmethod
+    def from_json(cls, json: dict[str, Any]) -> Workspace:
+        cloned = dict(json)
+        return Workspace(WorkspacePackage.from_json(cloned.pop("package")) if "package" in cloned else None, cloned)
+
+    def to_json(self) -> dict[str, Any]:
+        values = {"package": self.package.to_json() if self.package else None}
+        if self.unhandled is not None:
+            values.update({k: v for k, v in self.unhandled.items() if v is not None})
+        return {k: v for k, v in values.items() if v is not None}
+
+
+@dataclass
 class CargoManifest:
     _path: Path
     _data: dict[str, Any]
 
     package: Package
+    workspace: Workspace | None
     bin: list[Bin]
 
     @classmethod
@@ -60,6 +96,7 @@ class CargoManifest:
             path,
             data,
             Package.from_json(data["package"]),
+            Workspace.from_json(data["workspace"]) if "workspace" in data else None,
             [Bin(**x) for x in data.get("bin", [])],
         )
 
@@ -70,6 +107,8 @@ class CargoManifest:
         else:
             result.pop("bin", None)
         result["package"] = self.package.to_json()
+        if self.workspace:
+            result["workspace"] = self.workspace.to_json()
         return result
 
     def to_toml_string(self) -> str:
