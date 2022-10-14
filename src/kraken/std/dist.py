@@ -67,6 +67,7 @@ class DistributionTask(Task):
         assert isinstance(archive_type, str)
 
         print("Writing archive", colored(str(output_file), "yellow"))
+        output_file.parent.mkdir(parents=True, exist_ok=True)
         with wopen_archive(output_file, archive_type) as archive:
             for resource in self.resources.get():
                 if resource.options.arcname:
