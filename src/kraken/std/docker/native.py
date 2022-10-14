@@ -62,7 +62,7 @@ class NativeBuildTask(DockerBuildTask):
         if self.image_output_file.get():
             command += ["--output", f"type=tar,dest={self.image_output_file.get()}"]
 
-        command += ["--progress", "plain"]
+        command += ["--pull", "--progress", "plain"]
 
         # Buildx will take the secret from the environment variasbles.
         env = os.environ.copy()
