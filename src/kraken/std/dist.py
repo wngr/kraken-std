@@ -70,13 +70,17 @@ class DistributionTask(Task):
         output_file.parent.mkdir(parents=True, exist_ok=True)
         with wopen_archive(output_file, archive_type) as archive:
             for resource in self.resources.get():
-                if resource.options.arcname:
+                if resource.options.arcname is not None:
                     arcname = resource.options.arcname
                 elif isinstance(resource, BinaryArtifact):
                     arcname = resource.path.name
                 else:
                     arcname = str(resource.path)
-                print("  +", colored(arcname, "green"), f"({resource.path})" if arcname != str(resource.path) else "")
+                print(
+                    "  +",
+                    colored(arcname or ".", "green"),
+                    f"({resource.path})" if arcname != str(resource.path) else "",
+                )
                 archive.add_path(arcname, self.project.directory / resource.path)
 
 
