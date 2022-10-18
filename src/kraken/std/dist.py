@@ -7,6 +7,7 @@ import logging
 import tarfile
 import zipfile
 from dataclasses import dataclass
+from fnmatch import fnmatch
 from pathlib import Path
 from typing import Any, List, Mapping, Sequence, Union, cast
 
@@ -24,6 +25,8 @@ logger = logging.getLogger(__name__)
 @dataclass
 class IndividualDistOptions:
     arcname: str | None = None
+    exclude: Sequence[str] = ()
+    include: Sequence[str] | None = None
 
 
 @dataclass
@@ -81,7 +84,14 @@ class DistributionTask(Task):
                     colored(arcname or ".", "green"),
                     f"({resource.path})" if arcname != str(resource.path) else "",
                 )
-                archive.add_path(arcname, self.project.directory / resource.path)
+                add_to_archive(
+                    archive,
+                    arcname,
+                    self.project.directory / resource.path,
+                    resource.path,
+                    resource.options.exclude,
+                    resource.options.include,
+                )
 
 
 def wopen_archive(path: Path, type_: str) -> ArchiveWriter:
@@ -96,6 +106,46 @@ def wopen_archive(path: Path, type_: str) -> ArchiveWriter:
         return ZipArchiveWriter(path)
     else:
         raise ValueError(f"unsupported archive type: {type_!r}")
+
+
+def add_to_archive(
+    writer: ArchiveWriter,
+    arcname: str,
+    path: Path,
+    test_path: Path | None = None,
+    exclude: Sequence[str] = (),
+    include: Sequence[str] | None = None,
+) -> None:
+    """Recursively adds *path* to the archive *writer* under consideration of the *exclude* and *include* glob
+    patterns that are tested against *test_path*.
+
+    The glob patterns for the *exclude* and *include* arguments are tested against the full relative *test_path*
+    as well as the individual filename. (NOTE(niklas.rosenstein): To support full .gitignore like behaviour, we'd
+    need to test the entire range from name to full path).
+
+    :param writer: The archive writer implementation.
+    :param arcname: The name to give *path*. Sub-paths are appended to this name as normal.
+    :param path: The path to write to the archive.
+    :param test_path: The path to test the exclude/include patterns against. Sub-paths are appended to this as normal.
+        Defaults to *path*.
+    :param exclude: A sequence of glob patterns that, if matching, cause an element (file or directory) to be excluded.
+    :param include: If specified, must be a sequence of glob patterns that will cause a file or directory to only be
+        added if any pattern matches, and no *exclude* pattern matches.
+    """
+
+    test_path = test_path or path
+    s_test_path = str(test_path)
+
+    if any(fnmatch(s_test_path, x) or fnmatch(test_path.name, x) for x in exclude):
+        return
+    if include is not None and not any(fnmatch(s_test_path, x) or fnmatch(test_path.name, x) for x in include):
+        return
+
+    if path.is_dir():
+        for item in path.iterdir():
+            add_to_archive(writer, arcname + "/" + item.name, item, test_path / item.name, exclude, include)
+    else:
+        writer.add_file(arcname, path)
 
 
 class ArchiveWriter(abc.ABC):
