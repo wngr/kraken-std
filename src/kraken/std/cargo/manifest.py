@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, fields
 from pathlib import Path
-from typing import Any
+from typing import Any, List
 
 import tomli
 import tomli_w
+from pydantic import ClassError
 
 
 @dataclass
@@ -62,12 +63,17 @@ class WorkspacePackage:
 @dataclass
 class Workspace:
     package: WorkspacePackage | None
+    members: List[str] | None
     unhandled: dict[str, Any] | None
 
     @classmethod
     def from_json(cls, json: dict[str, Any]) -> Workspace:
         cloned = dict(json)
-        return Workspace(WorkspacePackage.from_json(cloned.pop("package")) if "package" in cloned else None, cloned)
+        return Workspace(
+            WorkspacePackage.from_json(cloned.pop("package")) if "package" in cloned else None,
+            cloned.pop("members") if "members" in cloned else None,
+            cloned,
+        )
 
     def to_json(self) -> dict[str, Any]:
         values = {"package": self.package.to_json() if self.package else None}
@@ -81,21 +87,24 @@ class CargoManifest:
     _path: Path
     _data: dict[str, Any]
 
-    package: Package
+    package: Package | None
     workspace: Workspace | None
     bin: list[Bin]
 
     @classmethod
     def read(cls, path: Path) -> CargoManifest:
         with path.open("rb") as fp:
-            return cls.of(path, tomli.load(fp))
+            ret = cls.of(path, tomli.load(fp))
+            if ret.package is None and ret.workspace is None:
+                raise ClassError
+            return ret
 
     @classmethod
     def of(cls, path: Path, data: dict[str, Any]) -> CargoManifest:
         return cls(
             path,
             data,
-            Package.from_json(data["package"]),
+            Package.from_json(data["package"]) if "package" in data else None,
             Workspace.from_json(data["workspace"]) if "workspace" in data else None,
             [Bin(**x) for x in data.get("bin", [])],
         )
@@ -106,7 +115,8 @@ class CargoManifest:
             result["bin"] = [x.to_json() for x in self.bin]
         else:
             result.pop("bin", None)
-        result["package"] = self.package.to_json()
+        if self.package:
+            result["package"] = self.package.to_json()
         if self.workspace:
             result["workspace"] = self.workspace.to_json()
         return result

@@ -1,5 +1,8 @@
 from pathlib import Path
 
+import pytest
+from pydantic import ClassError
+
 from kraken.std.cargo.manifest import CargoManifest
 
 
@@ -65,3 +68,29 @@ def test_cargo_manifest_complex_file() -> None:
     assert manifest.package.version == "0.8.5"
     assert manifest.package.unhandled["include"] == ["src/", "LICENSE-*", "README.md", "CHANGELOG.md", "COPYRIGHT"]
     assert manifest.package.unhandled["autobenches"]
+
+
+def test_cargo_manifest_workspace_file() -> None:
+    """
+    This test ensures that when we read a file missing a Package section, as long as it has a Workspace
+    section it correctly passes.
+    """
+
+    cargo_file = Path(__file__).parent / "data" / "workspace_manifest.toml"
+    manifest = CargoManifest.read(cargo_file)
+
+    assert manifest.package is None
+    assert manifest.workspace is not None
+    assert manifest.workspace.members is not None
+    assert manifest.workspace.members == ["crates/*"]
+
+
+def test_cargo_manifest_throws_when_no_workspace_or_package() -> None:
+    """
+    This test ensures that when we read a file missing both a Package section and a Workspace section, it
+    throws a ClassError.
+    """
+
+    cargo_file = Path(__file__).parent / "data" / "invalid_manifest.toml"
+    with pytest.raises(ClassError):
+        CargoManifest.read(cargo_file)
