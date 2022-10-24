@@ -9,7 +9,7 @@ import zipfile
 from dataclasses import dataclass
 from fnmatch import fnmatch
 from pathlib import Path
-from typing import Any, List, Mapping, Sequence, Union, cast
+from typing import Any, List, Mapping, Optional, Sequence, Union, cast
 
 import databind.json
 from kraken.core import Project, Property, Task
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class IndividualDistOptions:
     arcname: str | None = None
     exclude: Sequence[str] = ()
-    include: Sequence[str] | None = None
+    include: Optional[Sequence[str]] = None
 
 
 @dataclass

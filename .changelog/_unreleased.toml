@@ -3,3 +3,9 @@ id = "bf25514f-ad6d-4fd0-921b-c14bdc2c2514"
 type = "feature"
 description = "Add `cargo_bump_version(registry)` parameter which overwrites the the version and registry of path dependencies."
 author = "@tetigi"
+
+[[entries]]
+id = "a65bd8dc-ee59-4ff5-98b7-ab7df918db04"
+type = "fix"
+description = "Fix backwards incompatible type hint for annotations that are introspected at runtime in `kraken.std.dist` module."
+author = "@NiklasRosenstein"
