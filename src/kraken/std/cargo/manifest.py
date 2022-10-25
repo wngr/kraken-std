@@ -83,12 +83,26 @@ class Workspace:
 
 
 @dataclass
+class Dependencies:
+    data: dict[str, Any]
+
+    @classmethod
+    def from_json(cls, json: dict[str, Any]) -> Dependencies:
+        cloned = dict(json)
+        return Dependencies(cloned)
+
+    def to_json(self) -> dict[str, Any]:
+        return self.data
+
+
+@dataclass
 class CargoManifest:
     _path: Path
     _data: dict[str, Any]
 
     package: Package | None
     workspace: Workspace | None
+    dependencies: Dependencies | None
     bin: list[Bin]
 
     @classmethod
@@ -106,6 +120,7 @@ class CargoManifest:
             data,
             Package.from_json(data["package"]) if "package" in data else None,
             Workspace.from_json(data["workspace"]) if "workspace" in data else None,
+            Dependencies.from_json(data["dependencies"]) if "dependencies" in data else None,
             [Bin(**x) for x in data.get("bin", [])],
         )
 
@@ -119,6 +134,8 @@ class CargoManifest:
             result["package"] = self.package.to_json()
         if self.workspace:
             result["workspace"] = self.workspace.to_json()
+        if self.dependencies:
+            result["dependencies"] = self.dependencies.to_json()
         return result
 
     def to_toml_string(self) -> str:

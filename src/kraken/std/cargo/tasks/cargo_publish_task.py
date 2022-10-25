@@ -20,7 +20,7 @@ class CargoPublishTask(CargoBuildTask):
     #: The registry to publish the package to.
     registry: Property[CargoRegistry]
 
-    #: Verify (build the create).
+    #: Verify (build the crate).
     verify: Property[bool] = Property.default(True)
 
     #: Allow dirty worktree.

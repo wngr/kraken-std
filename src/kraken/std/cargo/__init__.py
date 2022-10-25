@@ -144,6 +144,7 @@ def cargo_bump_version(
     revert: bool = True,
     name: str = "cargoBumpVersion",
     group: str | None = CARGO_BUILD_SUPPORT_GROUP_NAME,
+    registry: str | None = None,
     project: Project | None = None,
 ) -> CargoBumpVersionTask:
     """Get or create a task that bumps the version in `Cargo.toml`.
@@ -155,12 +156,14 @@ def cargo_bump_version(
     :param group: The group to assign the task to (even if the task is reused)."""
 
     project = project or Project.current()
+
     return project.do(
         name,
         CargoBumpVersionTask,
         group=group,
         version=version,
         revert=revert,
+        registry=registry,
     )
 
 
