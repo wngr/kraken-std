@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class IndividualDistOptions:
-    arcname: str | None = None
+    arcname: Optional[str] = None
     exclude: Sequence[str] = ()
     include: Optional[Sequence[str]] = None
 
