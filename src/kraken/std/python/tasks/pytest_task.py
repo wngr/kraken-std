@@ -18,6 +18,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
     tests_dir: Property[Path]
     ignore_dirs: Property[List[Path]] = Property.config(default_factory=list)
     allow_no_tests: Property[bool] = Property.config(default=False)
+    marker: Property[str]
 
     def is_skippable(self) -> bool:
         return self.allow_no_tests.get() and self.tests_dir.is_empty() and not self.settings.get_tests_directory()
@@ -31,6 +32,8 @@ class PytestTask(EnvironmentAwareDispatchTask):
         command = ["pytest", "-vv", str(self.project.directory / tests_dir)]
         command += flatten(["--ignore", str(self.project.directory / path)] for path in self.ignore_dirs.get())
         command += ["--log-cli-level", "INFO"]
+        if self.marker.is_filled():
+            command += ["-m", self.marker.get()]
         command += shlex.split(os.getenv("PYTEST_FLAGS", ""))
         return command
 
