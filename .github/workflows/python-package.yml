@@ -20,10 +20,18 @@ jobs:
             test-type: lint test
           - python-version: "3.10"
             test-type: lint test
-          - python-version: "3.11"
-            test-type: lint test
-          # - python-version: "3.x"
+
+          # NOTE(NiklasRosenstein): Dill can't serialize Python 3.11 code objects.
+          #
+          #     AttributeError: 'code' object has no attribute 'co_endlinetable'. Did you mean: 'co_linetable'?
+          #
+          #   See https://github.com/uqfoundation/dill/issues/514. The 3.6 version of Dill apparently fixes this
+          #   issue, but introduces another with serializing metaclasses, see
+          #   https://github.com/uqfoundation/dill/issues/332#issuecomment-1289537575.
+
+          # - python-version: "3.11"
           #   test-type: lint test
+
           - python-version: "3.7"
             test-type: integrationTest
     steps:
