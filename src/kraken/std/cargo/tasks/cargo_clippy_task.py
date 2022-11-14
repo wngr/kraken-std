@@ -16,7 +16,7 @@ class CargoClippyTask(CargoBuildTask):
     # CargoBuildTask
 
     def get_cargo_command(self, env: Dict[str, str]) -> List[str]:
-        command = ["cargo", "clippy"]
+        command = ["cargo", "clippy", "--all-features", "--tests"]
         if self.fix.get():
             command += ["--fix"]
             allow = self.allow.get()
@@ -26,4 +26,5 @@ class CargoClippyTask(CargoBuildTask):
                 command += ["--allow-dirty", "--allow-staged"]
             elif allow is not None:
                 raise ValueError(f"invalid allow: {allow!r}")
+        command += ["--", "-D", "warnings"]
         return command
